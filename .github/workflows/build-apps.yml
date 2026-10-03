@@ -1,0 +1,52 @@
+name: Build desktop apps
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - name: Install dependencies
+        run: python -m pip install -r requirements-build.txt
+      - name: Build Windows app
+        shell: cmd
+        run: |
+          set PYQTGRAPH_QT_LIB=PySide6
+          python -m PyInstaller --noconfirm --clean TDT_Viewer_TextSync_LFP_Spectrogram_v4.spec
+      - name: Archive Windows app
+        shell: powershell
+        run: Compress-Archive -Path 'dist\TDT Viewer TextSync LFP Spectrogram v4' -DestinationPath 'dist\TDT_Viewer_TextSync_LFP_Spectrogram_v4_Windows_x64.zip' -Force
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TDT-Viewer-TextSync-LFP-Spectrogram-v4-Windows-x64
+          path: dist/TDT_Viewer_TextSync_LFP_Spectrogram_v4_Windows_x64.zip
+
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - name: Install dependencies
+        run: python -m pip install -r requirements-build.txt
+      - name: Build macOS app
+        run: |
+          export PYQTGRAPH_QT_LIB=PySide6
+          python -m PyInstaller --noconfirm --clean TDT_Viewer_TextSync_LFP_Spectrogram_v4.spec
+          codesign --force --deep --sign - "dist/TDT Viewer TextSync LFP Spectrogram v4.app"
+          ditto -c -k --sequesterRsrc --keepParent "dist/TDT Viewer TextSync LFP Spectrogram v4.app" "dist/TDT_Viewer_TextSync_LFP_Spectrogram_v4_macOS_arm64.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TDT-Viewer-TextSync-LFP-Spectrogram-v4-macOS
+          path: dist/TDT_Viewer_TextSync_LFP_Spectrogram_v4_macOS_arm64.zip

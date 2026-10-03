@@ -1,0 +1,20 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+*.log
+
+# Local Python environments and caches
+.venv/
+venv/
+.pyinstaller-cache/
+.pytest_cache/
+
+# Generated desktop applications
+build/
+dist/
+*.app/
+*.exe
+*.zip
+
+# Viewer sessions can contain large cached recordings
+*.tdtv
