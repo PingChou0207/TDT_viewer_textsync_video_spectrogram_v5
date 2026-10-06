@@ -1,4 +1,4 @@
-# TDT Viewer TextSync LFP Spectrogram v5
+# TDT_viewer_textsync_video_spectrogram_v5
 
 A read-only desktop viewer for TDT blocks and synchronized text/CSV traces. It displays epoch events, multi-channel LFP and MU traces, imported TXT traces, and independent LFP and TXT spectrograms on a shared time axis.
 
@@ -23,7 +23,7 @@ Python 3.12 is recommended.
 python -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 python -m pip install -r requirements-build.txt
-python src/tdt_viewer_textsync_lfp_spectrogram_v5.py
+python src/TDT_viewer_textsync_video_spectrogram_v5.py
 ```
 
 Click **Open Block** to load a TDT block. Click **Open Text** to add a numeric TXT/CSV trace, then set **TXT sampling rate** to the actual sampling frequency. LFP and TXT spectrogram settings are independent.
@@ -34,7 +34,7 @@ If a matching camera file is present, click **Camera** to show it beside the plo
 
 - macOS Apple Silicon: run `./build_macos.command`. The generated app and ZIP are in `dist/`. The app is ad-hoc signed but not Apple-notarized; on first launch, Control-click and choose **Open**.
 - Windows x64: on a Windows 10/11 computer with Python 3.12, run `build_windows.bat`. Keep the resulting EXE and `_internal` folder together.
-- GitHub Actions: run **Build desktop apps** manually, or push a version tag beginning with `v`. The workflow produces downloadable build artifacts for both platforms.
+- GitHub Actions: run **Build desktop apps** manually, push to `main`, or push a version tag beginning with `v`. The workflow produces downloadable build artifacts for both platforms.
 
 See [build and launch notes](README_BUILD.txt) for file names and paths. The source ZIP from GitHub's **Code → Download ZIP** is not a prebuilt application.
 

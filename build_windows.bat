@@ -3,7 +3,7 @@ setlocal EnableExtensions
 cd /d "%~dp0"
 
 echo ============================================================
-echo Building TDT Viewer TextSync LFP Spectrogram v5 for Windows x64
+echo Building TDT_viewer_textsync_video_spectrogram_v5 for Windows x64
 echo ============================================================
 
 where py >nul 2>nul
@@ -30,22 +30,22 @@ if errorlevel 1 goto :failed
 set "PYQTGRAPH_QT_LIB=PySide6"
 set "PYINSTALLER_CONFIG_DIR=%CD%\.pyinstaller-cache"
 
-python -m PyInstaller --noconfirm --clean TDT_Viewer_TextSync_LFP_Spectrogram_v5.spec
+python -m PyInstaller --noconfirm --clean TDT_viewer_textsync_video_spectrogram_v5.spec
 if errorlevel 1 goto :failed
 
-if not exist "dist\TDT Viewer TextSync LFP Spectrogram v5\TDT Viewer TextSync LFP Spectrogram v5.exe" (
+if not exist "dist\TDT_viewer_textsync_video_spectrogram_v5\TDT_viewer_textsync_video_spectrogram_v5.exe" (
     echo ERROR: Expected EXE was not created.
     goto :failed
 )
 
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-    "Compress-Archive -Path 'dist\TDT Viewer TextSync LFP Spectrogram v5' -DestinationPath 'dist\TDT_Viewer_TextSync_LFP_Spectrogram_v5_Windows_x64.zip' -Force"
+    "Compress-Archive -Path 'dist\TDT_viewer_textsync_video_spectrogram_v5' -DestinationPath 'dist\TDT_viewer_textsync_video_spectrogram_v5_Windows_x64.zip' -Force"
 if errorlevel 1 goto :failed
 
 echo.
 echo BUILD COMPLETE
-echo EXE: %CD%\dist\TDT Viewer TextSync LFP Spectrogram v5\TDT Viewer TextSync LFP Spectrogram v5.exe
-echo ZIP: %CD%\dist\TDT_Viewer_TextSync_LFP_Spectrogram_v5_Windows_x64.zip
+echo EXE: %CD%\dist\TDT_viewer_textsync_video_spectrogram_v5\TDT_viewer_textsync_video_spectrogram_v5.exe
+echo ZIP: %CD%\dist\TDT_viewer_textsync_video_spectrogram_v5_Windows_x64.zip
 echo.
 pause
 exit /b 0

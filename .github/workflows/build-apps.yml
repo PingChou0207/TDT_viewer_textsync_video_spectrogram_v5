@@ -23,14 +23,14 @@ jobs:
         shell: cmd
         run: |
           set PYQTGRAPH_QT_LIB=PySide6
-          python -m PyInstaller --noconfirm --clean TDT_Viewer_TextSync_LFP_Spectrogram_v5.spec
+          python -m PyInstaller --noconfirm --clean TDT_viewer_textsync_video_spectrogram_v5.spec
       - name: Archive Windows app
         shell: powershell
-        run: Compress-Archive -Path 'dist\TDT Viewer TextSync LFP Spectrogram v5' -DestinationPath 'dist\TDT_Viewer_TextSync_LFP_Spectrogram_v5_Windows_x64.zip' -Force
+        run: Compress-Archive -Path 'dist\TDT_viewer_textsync_video_spectrogram_v5' -DestinationPath 'dist\TDT_viewer_textsync_video_spectrogram_v5_Windows_x64.zip' -Force
       - uses: actions/upload-artifact@v4
         with:
-          name: TDT_Viewer_TextSync_LFP_Spectrogram_v5_Windows_x64
-          path: dist/TDT_Viewer_TextSync_LFP_Spectrogram_v5_Windows_x64.zip
+          name: TDT_viewer_textsync_video_spectrogram_v5_Windows_x64
+          path: dist/TDT_viewer_textsync_video_spectrogram_v5_Windows_x64.zip
 
   macos:
     runs-on: macos-14
@@ -46,10 +46,10 @@ jobs:
       - name: Build macOS app
         run: |
           export PYQTGRAPH_QT_LIB=PySide6
-          python -m PyInstaller --noconfirm --clean TDT_Viewer_TextSync_LFP_Spectrogram_v5.spec
-          codesign --force --deep --sign - "dist/TDT Viewer TextSync LFP Spectrogram v5.app"
-          ditto -c -k --sequesterRsrc --keepParent "dist/TDT Viewer TextSync LFP Spectrogram v5.app" "dist/TDT_Viewer_TextSync_LFP_Spectrogram_v5_macOS_arm64.zip"
+          python -m PyInstaller --noconfirm --clean TDT_viewer_textsync_video_spectrogram_v5.spec
+          codesign --force --deep --sign - "dist/TDT_viewer_textsync_video_spectrogram_v5.app"
+          ditto -c -k --sequesterRsrc --keepParent "dist/TDT_viewer_textsync_video_spectrogram_v5.app" "dist/TDT_viewer_textsync_video_spectrogram_v5_macOS_arm64.zip"
       - uses: actions/upload-artifact@v4
         with:
-          name: TDT_Viewer_TextSync_LFP_Spectrogram_v5_macOS_arm64
-          path: dist/TDT_Viewer_TextSync_LFP_Spectrogram_v5_macOS_arm64.zip
+          name: TDT_viewer_textsync_video_spectrogram_v5_macOS_arm64
+          path: dist/TDT_viewer_textsync_video_spectrogram_v5_macOS_arm64.zip

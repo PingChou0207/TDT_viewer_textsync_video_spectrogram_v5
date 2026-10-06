@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 project_root = Path(SPECPATH)
-entry_script = project_root / "src" / "tdt_viewer_textsync_lfp_spectrogram_v5.py"
+entry_script = project_root / "src" / "TDT_viewer_textsync_video_spectrogram_v5.py"
 
 a = Analysis(
     [str(entry_script)],
@@ -49,7 +49,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name="TDT Viewer TextSync LFP Spectrogram v5",
+    name="TDT_viewer_textsync_video_spectrogram_v5",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -69,17 +69,17 @@ coll = COLLECT(
     strip=False,
     upx=False,
     upx_exclude=[],
-    name="TDT Viewer TextSync LFP Spectrogram v5",
+    name="TDT_viewer_textsync_video_spectrogram_v5",
 )
 
 if sys.platform == "darwin":
     app = BUNDLE(
         coll,
-        name="TDT Viewer TextSync LFP Spectrogram v5.app",
+        name="TDT_viewer_textsync_video_spectrogram_v5.app",
         icon=None,
-        bundle_identifier="com.pingchou.tdt-viewer-textsync-lfp-spectrogram-v5",
+        bundle_identifier="com.pingchou.tdt-viewer-textsync-video-spectrogram-v5",
         info_plist={
-            "CFBundleDisplayName": "TDT Viewer TextSync LFP Spectrogram v5",
+            "CFBundleDisplayName": "TDT_viewer_textsync_video_spectrogram_v5",
             "CFBundleShortVersionString": "5.0.0",
             "CFBundleVersion": "5.0.0",
             "NSHighResolutionCapable": True,

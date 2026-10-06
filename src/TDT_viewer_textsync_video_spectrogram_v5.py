@@ -11,7 +11,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 import pyqtgraph as pg
 from camera_sync import CameraDock
 
-APP_NAME = "TDT Viewer TextSync LFP Spectrogram v5"
+APP_NAME = "TDT_viewer_textsync_video_spectrogram_v5"
 
 try:
     from scipy import signal as scipy_signal
