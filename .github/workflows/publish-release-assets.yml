@@ -1,0 +1,30 @@
+name: Publish v5.1.0 release assets
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  attach:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Download verified Windows and macOS archives
+        run: |
+          set -euo pipefail
+          gh run download 37427032155 -n TDT_viewer_textsync_video_spectrogram_v5_Windows_x64 -D release-assets/windows
+          gh run download 37427032155 -n TDT_viewer_textsync_video_spectrogram_v5_macOS_arm64 -D release-assets/macos
+          test -s release-assets/windows/TDT_viewer_textsync_video_spectrogram_v5_Windows_x64.zip
+          test -s release-assets/macos/TDT_viewer_textsync_video_spectrogram_v5_macOS_arm64.zip
+      - name: Attach archives to the published release
+        run: |
+          set -euo pipefail
+          gh release upload v5.1.0 \
+            release-assets/windows/TDT_viewer_textsync_video_spectrogram_v5_Windows_x64.zip \
+            release-assets/macos/TDT_viewer_textsync_video_spectrogram_v5_macOS_arm64.zip \
+            --clobber
