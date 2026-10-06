@@ -1,4 +1,4 @@
-# TDT Viewer TextSync LFP Spectrogram v4
+# TDT Viewer TextSync LFP Spectrogram v5
 
 A read-only desktop viewer for TDT blocks and synchronized text/CSV traces. It displays epoch events, multi-channel LFP and MU traces, imported TXT traces, and independent LFP and TXT spectrograms on a shared time axis.
 
@@ -11,6 +11,7 @@ A read-only desktop viewer for TDT blocks and synchronized text/CSV traces. It d
 - Real and percentage power; constant or linear detrending; optional NeuroExplorer-compatible Gaussian frequency smoothing
 - Configurable frequency range, resolution, time step, overlap, color range, and `viridis`/`jet` color maps
 - Synchronized cursor and event navigation, image export, session save/open, and gain-normalized TDT traces
+- Optional Camera dock for blocks containing a `Cam#` epoc and matching `Cam#.avi` or `Cam#.mp4`; Play/Pause and frame stepping follow recorded TDT timestamps
 
 TDT blocks are read without modifying the source data. Only open `.tdtv` session files from trusted sources because sessions use Python pickle.
 
@@ -22,10 +23,12 @@ Python 3.12 is recommended.
 python -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 python -m pip install -r requirements-build.txt
-python src/tdt_viewer_textsync_lfp_spectrogram_v4.py
+python src/tdt_viewer_textsync_lfp_spectrogram_v5.py
 ```
 
 Click **Open Block** to load a TDT block. Click **Open Text** to add a numeric TXT/CSV trace, then set **TXT sampling rate** to the actual sampling frequency. LFP and TXT spectrogram settings are independent.
+
+If a matching camera file is present, click **Camera** to show it beside the plots. The video uses `Cam#` epoc times rather than nominal FPS; video frames beyond the last recorded timestamp are not treated as synchronized. `.tdtv` stores camera timestamps and the original block path, but not the video itself, so the original AVI/MP4 must remain accessible.
 
 ## Build desktop applications
 
@@ -37,7 +40,7 @@ See [build and launch notes](README_BUILD.txt) for file names and paths. The sou
 
 ## Credits
 
-Application design and development: **PingChou**. This viewer uses the TDT Python SDK, Python, NumPy, SciPy, PySide6, pyqtgraph, and PyInstaller. TDT and NeuroExplorer are product names or trademarks of their respective owners; this is an independent application.
+Application design and development: **PingChou**. This viewer uses the TDT Python SDK, Python, NumPy, SciPy, PySide6, pyqtgraph, OpenCV, and PyInstaller. TDT and NeuroExplorer are product names or trademarks of their respective owners; this is an independent application.
 
 ## License
 

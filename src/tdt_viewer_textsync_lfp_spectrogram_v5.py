@@ -9,6 +9,9 @@ import numpy as np
 os.environ["PYQTGRAPH_QT_LIB"] = "PySide6"
 from PySide6 import QtCore, QtGui, QtWidgets
 import pyqtgraph as pg
+from camera_sync import CameraDock
+
+APP_NAME = "TDT Viewer TextSync LFP Spectrogram v5"
 
 try:
     from scipy import signal as scipy_signal
@@ -325,6 +328,7 @@ class TdtViewerWindow(QtWidgets.QMainWindow):
         self.stream_names = []
         self.epoc_names = []
         self.epoc_onsets = {}
+        self.epoc_values = {}
 
         self.default_window_sec = 5.0
         self.default_channel_spacing = 1.0
@@ -415,11 +419,16 @@ class TdtViewerWindow(QtWidgets.QMainWindow):
         self._refresh_timer.setSingleShot(True)
         self._refresh_timer.timeout.connect(self._do_refresh_plot)
 
-        self.setWindowTitle("TDT Viewer TextSync LFP Spectrogram v4")
+        self.setWindowTitle(APP_NAME)
         self.resize(1900, 1100)
         self.setMinimumSize(1100, 700)
 
         self._build_ui()
+        self.camera_dock = CameraDock(self)
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.camera_dock)
+        self.camera_dock.timeRequested.connect(self._camera_time_requested)
+        self.camera_dock.visibilityChanged.connect(self._camera_visibility_changed)
+        self.camera_dock.hide()
         self._apply_plot_theme()
 
         if block_path:
@@ -480,6 +489,14 @@ class TdtViewerWindow(QtWidgets.QMainWindow):
         self.credits_btn.setMinimumHeight(32)
         self.credits_btn.setFixedWidth(120)
         top_btn_col.addWidget(self.credits_btn)
+
+        self.camera_btn = QtWidgets.QPushButton("Camera")
+        self.camera_btn.setCheckable(True)
+        self.camera_btn.setEnabled(False)
+        self.camera_btn.setMinimumHeight(32)
+        self.camera_btn.setFixedWidth(120)
+        self.camera_btn.toggled.connect(self._toggle_camera)
+        top_btn_col.addWidget(self.camera_btn)
 
         left_layout.addLayout(top_btn_col)
 
@@ -1123,6 +1140,32 @@ class TdtViewerWindow(QtWidgets.QMainWindow):
     def _on_plot_double_clicked(self, x):
         self._set_cursor_time(x, update_label=True)
         self._update_cursor_plot_labels()
+        self.camera_dock.seek(x)
+
+    def _toggle_camera(self, checked):
+        self.camera_dock.setVisible(bool(checked) and self.camera_dock.has_camera)
+
+    def _camera_visibility_changed(self, visible):
+        self.camera_btn.blockSignals(True)
+        self.camera_btn.setChecked(bool(visible))
+        self.camera_btn.blockSignals(False)
+
+    def _configure_camera(self):
+        found = self.camera_dock.configure(
+            self.block_path, self.epoc_onsets, self.epoc_values
+        )
+        self.camera_btn.setEnabled(found)
+        self.camera_btn.setChecked(found)
+        self.camera_dock.seek(self.current_time)
+
+    def _camera_time_requested(self, seconds):
+        self._set_cursor_time(seconds, update_label=True)
+        if not self.show_cursor_on_traces:
+            self.show_cursor_check.setChecked(True)
+        if not (self.current_time <= seconds < self.current_time + self.window_sec):
+            self.current_time = max(0.0, seconds - self.window_sec / 2.0)
+            self._sync_time_widgets()
+            self.refresh_plot()
 
     def _set_cursor_time(self, t, update_label=True):
         t = float(np.clip(t, 0.0, max(self.total_duration, 0.001)))
@@ -1686,11 +1729,11 @@ class TdtViewerWindow(QtWidgets.QMainWindow):
         dialog.setIcon(QtWidgets.QMessageBox.Information)
         dialog.setTextFormat(QtCore.Qt.RichText)
         dialog.setText(
-            "<h3>TDT Viewer TextSync LFP Spectrogram</h3>"
-            "<p><b>Version:</b> 4.0</p>"
+            f"<h3>{APP_NAME}</h3>"
+            "<p><b>Version:</b> 5.0</p>"
             "<p><b>Application design and development:</b><br>PingChou</p>"
             "<p><b>Scientific and software components:</b><br>"
-            "TDT Python SDK, Python, NumPy, SciPy, PySide6 and pyqtgraph.</p>"
+            "TDT Python SDK, Python, NumPy, SciPy, PySide6, pyqtgraph and OpenCV.</p>"
             "<p>This application is an independent analysis and visualization tool. "
             "TDT and NeuroExplorer are trademarks or product names of their respective owners.</p>"
         )
@@ -1740,6 +1783,7 @@ class TdtViewerWindow(QtWidgets.QMainWindow):
                 "stream_names": list(self.stream_names),
                 "epoc_names": list(self.epoc_names),
                 "epoc_onsets": self.epoc_onsets,
+                "epoc_values": self.epoc_values,
                 "streams_cache": streams_cache,
                 "cursor_time": self.cursor_time,
                 "ui": {
@@ -1836,6 +1880,7 @@ class TdtViewerWindow(QtWidgets.QMainWindow):
             self.stream_names = session.get("stream_names", [])
             self.epoc_names = session.get("epoc_names", [])
             self.epoc_onsets = session.get("epoc_onsets", {})
+            self.epoc_values = session.get("epoc_values", {})
 
             streams_cache = session.get("streams_cache", {})
             self.data = CachedData()
@@ -1854,6 +1899,7 @@ class TdtViewerWindow(QtWidgets.QMainWindow):
             self._populate_streams()
             self._populate_channel_groups()
             self._populate_epocs()
+            self._configure_camera()
 
             if self.text_trace_data is not None:
                 n_channels = self.text_trace_data.shape[0]
@@ -2050,7 +2096,7 @@ class TdtViewerWindow(QtWidgets.QMainWindow):
             self.refresh_plot()
 
             short_name = os.path.basename(file_path)
-            self.setWindowTitle(f"TDT Viewer TextSync LFP Spectrogram v4 - {short_name}")
+            self.setWindowTitle(f"{APP_NAME} - {short_name}")
             self.statusBar().showMessage(f"Session loaded: {file_path}")
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "Open Session Error", str(e))
@@ -2123,6 +2169,7 @@ class TdtViewerWindow(QtWidgets.QMainWindow):
 
         self.epoc_names = []
         self.epoc_onsets = {}
+        self.epoc_values = {}
         if hasattr(data, "epocs") and data.epocs is not None:
             for name, obj in data.epocs.items():
                 onset = getattr(obj, "onset", None)
@@ -2133,6 +2180,13 @@ class TdtViewerWindow(QtWidgets.QMainWindow):
                     continue
                 self.epoc_names.append(name)
                 self.epoc_onsets[name] = arr
+                if name.lower().startswith("cam"):
+                    try:
+                        values = np.asarray(getattr(obj, "data", []), dtype=float).ravel()
+                    except (TypeError, ValueError):
+                        values = np.array([], dtype=float)
+                    if values.size == arr.size:
+                        self.epoc_values[name] = values
 
         self.total_duration = self._get_total_duration()
         self.current_time = 0.0
@@ -2142,6 +2196,7 @@ class TdtViewerWindow(QtWidgets.QMainWindow):
         self._populate_streams()
         self._populate_channel_groups()
         self._populate_epocs()
+        self._configure_camera()
 
         if restore_selection:
             self.restore_channel_selection()
@@ -2150,7 +2205,7 @@ class TdtViewerWindow(QtWidgets.QMainWindow):
             self.refresh_plot()
 
         short_name = self.block_path.rstrip("/").split("/")[-1]
-        self.setWindowTitle(f"TDT Viewer TextSync LFP Spectrogram v4 - {short_name}")
+        self.setWindowTitle(f"{APP_NAME} - {short_name}")
         self.statusBar().showMessage(f"Loaded block: {self.block_path}")
 
     def _populate_epocs(self):
@@ -3282,6 +3337,10 @@ class TdtViewerWindow(QtWidgets.QMainWindow):
         self._draw_txt_spectrogram_panel(x_left, x_right)
         self._sync_plot_margins()
         self._rebuild_cursor_items_after_clear()
+        if self.camera_dock.has_camera:
+            self.camera_dock.seek(
+                self.cursor_time if self.camera_dock.playing else self.current_time
+            )
 
         msg_parts = []
         if self.block_path:
@@ -3624,6 +3683,8 @@ class TdtViewerWindow(QtWidgets.QMainWindow):
         self.refresh_plot()
 
     def closeEvent(self, event):
+        self.camera_dock.stop_playback()
+        self.camera_dock.release()
         self.current_time = float(self.time_spin.value())
         self.window_sec = float(self.window_spin.value())
         self.channel_spacing = float(self.spacing_spin.value())
